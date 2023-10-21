@@ -4,7 +4,7 @@ import { METADATA_ENCODING_KEY, Payload, PayloadCodec, ValueError } from '@tempo
 import { temporal } from '@temporalio/proto';
 import { decode, encode } from '@temporalio/common/lib/encoding';
 //import { decrypt, encrypt } from './crypto';
-import { decryptPayload, encryptPayload } from './encryptDecryptKMS';
+import { EncryptionClient, algorithmCommitmentPairs } from './encryptDecryptKMS';
 
 const ENCODING = 'binary/encrypted';
 const METADATA_ENCRYPTION_KEY_ID = 'encryption-key-id';
@@ -19,6 +19,7 @@ export class EncryptionCodec implements PayloadCodec {
   }
 
   async encode(payloads: Payload[]): Promise<Payload[]> {
+    const encryptionClient = new EncryptionClient(algorithmCommitmentPairs[0]);
     return Promise.all(
       payloads.map(async (payload) => ({
         metadata: {
@@ -26,7 +27,7 @@ export class EncryptionCodec implements PayloadCodec {
           [METADATA_ENCRYPTION_KEY_ID]: encode(this.defaultKeyId),
         },
         // Encrypt entire payload, preserving metadata
-        data: await encryptPayload(
+        data: await encryptionClient.encryptPayload(
           temporal.api.common.v1.Payload.encode(payload).finish()
         ),
       }))
@@ -34,6 +35,7 @@ export class EncryptionCodec implements PayloadCodec {
   }
 
   async decode(payloads: Payload[]): Promise<Payload[]> {
+    const encryptionClient = new EncryptionClient(algorithmCommitmentPairs[0]);
     return Promise.all(
       payloads.map(async (payload) => {
         if (!payload.metadata || decode(payload.metadata[METADATA_ENCODING_KEY]) !== ENCODING) {
@@ -54,7 +56,7 @@ export class EncryptionCodec implements PayloadCodec {
           key = await fetchKey(keyId);
           this.keys.set(keyId, key);
         }
-        const decryptedPayloadBytes = await decryptPayload(payload.data);
+        const decryptedPayloadBytes = await encryptionClient.decryptPayload(payload.data);
         // console.log('Decrypting payload.data:', payload.data);
         return temporal.api.common.v1.Payload.decode(decryptedPayloadBytes);
       })
