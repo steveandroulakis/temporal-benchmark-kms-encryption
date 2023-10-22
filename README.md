@@ -1,13 +1,14 @@
 ## Temporal Sample: Benchmark KMS Encryption SDK Algorithm Suites
 
 Benchmarks the AWS KMS Encryption SDK with different algorithm suites, when encoding/decoding Temporal payloads.
-
-A Temporal Version of [AWS Step Functions: Lambda orchestration example](https://docs.aws.amazon.com/step-functions/latest/dg/sample-lambda-orchestration.html)
+* Runs each of the 11 encryption algorithms 600 times (half encryption, half decryption) `./src/temporal/test-encryption.ts`
+* A Temporal DataConverter that uses KMS and the Encryption SDK to encrypt/decrypt payloads `encryptDecryptKMS.ts`
+* AWS CDK code for deploying a KMS CMK and alias `./deploy`
 
 TODO: KMS key arn is hard-coded in encryptDecryptKMS.ts, make env var
 TODO: Algorithm suite choice is hard-coded in encryptDecryptKMS.ts, make env var and record in workflow
 TODO: Benchmark results are console logged as strings, make them a typed object and record in workflow
-TODO: Key name is my name :) -- change
+TODO: Codec Server
 
 #### Deploy AWS KMS CMKs
 See `README.md` in the `deploy` directory for AWS CDK instructions.

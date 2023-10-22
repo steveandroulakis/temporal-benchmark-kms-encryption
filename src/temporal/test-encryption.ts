@@ -26,17 +26,11 @@ const runExample = async (payload: string) => {
         let encrypted: Uint8Array = new Uint8Array();
         const cleartext = stringToAsciiArray(payload);
 
-        for (const i of Array(10).keys()) {
-            for (const j of Array(10).keys()) {
+        for (const i of Array(300).keys()) {
                 encrypted = await encryptionClient.encryptPayload(cleartext);
-                await delay(300);
-            }
-            for (const k of Array(10).keys()) {
                 const decrypted = await encryptionClient.decryptPayload(encrypted);
-                await delay(300);
-            }
-            await delay(2000);
         }
+        await delay(1000);
     }
 };
 
@@ -51,5 +45,6 @@ fs.readFile(filePath, 'utf8', function (err: any, data: any) {
     if (err) {
         return console.log(err);
     }
+    console.log('ok');
     runExample(data);
 });
